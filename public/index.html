@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="index.js"></script>
+    <script src="index.js" defer></script>
+    <link rel="stylesheet" href="index.css">
     <title>Index</title>
 </head>
 <body>
@@ -17,18 +18,38 @@
         <a href="login.html">Logg ut</a>
     </nav>
 
-    <div id = "tidligereØkter">
-
-    </div>
+    <table id = "tidlegare_okter">
+        <tr>
+            <th>Tidlegare Økter</th>
+        </tr>
+<!-- Disse blir fylt ut av javascript -->
+        <tr>
+            <td id = "utskrift1"></td>
+        </tr>
+            <tr>
+            <td id = "utskrift2"></td>
+        </tr>
+        <tr>
+            <td id = "utskrift3"></td>
+        </tr>
+    </table>
 
     <div id = "pågåendeØkt">
 
     </div>
 
     <div id = "knapper">
-        <button>Legg til økt</button>
-        <button>Legg til øvelse</button>
+        <button id = "oektKnapp">Legg til økt</button>
+        <button id = "ovelseKnapp">Legg til øvelse</button>
     </div>
+
+    <form id = "ovelse" class = "hidden">
+        <label for="name">Navnet til øvelsen:</label>
+        <input type="text" for="name" id="name" required>
+        <label for="name">Navnet til muskelen:</label>
+        <input type="text" for="name" id="muskel" required>
+        <button type="submit">Legg til</button>
+    </form>
     
 </body>
 </html>

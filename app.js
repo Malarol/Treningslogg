@@ -78,20 +78,27 @@ app.get('/api/ovelser', (req, res) => {
     res.json(rows);
 });
 
-app.get('api/oekt/:brukernavn', (req, res) => {
-    const brukernavn = req.params.brukernavn;
-    if (!brukernavn) return res.status(400).json({ error: 'Mangler brukernavn' });
+app.get('/api/oekt', (req, res) => {
+    if (!req.session.bruker) {
+        return res.status(401).json({ error: 'Ikkje innlogga' });
+    }
+
+    const brukernavn = req.session.bruker.brukernavn;
 
     const rows = db.prepare(`
-        SELECT Oekt.oekt_id
-        FROM Person
-        JOIN Oekt ON Person.brukernavn = Oekt.brukernavn
-        JOIN Oekt ON oekt.oekt.id = Oekt.oekt_id
-        WHERE Person.brukernavn = ?
+        SELECT oekt_id
+        FROM Oekt
+        WHERE brukernavn = ?
     `).all(brukernavn);
-
     res.json(rows);
 });
+
+app.post("/api/ny_oekt", (req, res) => {
+    const {dato, oekt_type, brukernavn} = req.body;
+
+        db.prepare('INSERT INTO Oekt (dato, oekt_type, brukernavn) VALUES (?,?, ?)').run(dato, oekt_type, brukernavn);
+
+})
 
 // Rute som lar oss registrere en ny fjelltur for en person
 app.post('/api/registrer_ovelse', express.json(), (req, res) => {
