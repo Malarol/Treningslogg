@@ -20,22 +20,14 @@ form.addEventListener("submit", function(event) {
 });
 
 async function login(brukernavn, passord) {
-// Finner stien til alle brukerene
-    const response = await fetch('http://localhost:3000/api/bruker');
-    const personer = await response.json();
+    const response = await fetch('/api/login', {
+        method: "POST",
+        headers: {"Content-Type": "application/json" },
+        body: JSON.stringify({brukernavn, passord})
+    });
 
-    let login_status = false;
-
-// Sjekker om både brukernavn og passord matcher med ein eksisterande bruker
-    for (let i = 0; i < personer.length; i++) {
-        if (brukernavn === personer[i].brukernavn && passord === personer[i].passord) {
-            login_status = true;
-        }
-    }
-
-    if (login_status === true) {
-        localStorage.setItem("brukernavn", brukernavn)
-        window.location.href = "index.html";
+    if (response.ok) {
+        window.location.href = "index.html"
     }
     else {
         console.log("Feil brukernavn eller passord")
@@ -50,12 +42,16 @@ async function signup(brukernavn, passord) {
         },
         body: JSON.stringify({brukernavn, passord})
     });
-    localStorage.setItem("brukernavn", brukernavn)
-    window.location.href = "index.html";
+
+    if (response.ok) {
+        window.location.href = "login.html"
+    }
+    else {
+        console.log("Brukeren eksisterer allerede eller teknisk feil")
+    }
 };
 
 // Slutt Authecation system
-
 
 
 

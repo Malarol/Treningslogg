@@ -1,8 +1,13 @@
-function utformHTML() {
-    const brukernavn = localStorage.getItem("brukernavn")
-    document.getElementById("Navn").innerText = "Velkommen" + brukernavn;
+async function authenticate() {
+    const response = await fetch("api/session");
+
+    if (!response.ok) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    const bruker = await response.json();
+      document.getElementById("Navn").innerText = "Velkommen " + bruker.brukernavn;
 }
 
-utformHTML()
-
-console.log(localStorage.getItem("brukernavn"))
+authenticate();

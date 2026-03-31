@@ -4,28 +4,79 @@ const app = express();
 const PORT = 3000;
 
 const Database = require('better-sqlite3');
-const db = new Database('trening.db');
+const db = new Database('trening-backup.db');
 
 // CORS-middleware for å tillate forespørsler fra andre domener
 const cors = require('cors');
 app.use(cors());
 app.use(express.static('public'));
 
-app.post("/api/registrer_bruker", express.json(), (req, res) => {
+const bcrypt = require('bcryptjs')
+
+const session = require('express-session')
+app.use(express.json());
+
+app.use(session({
+    secret: "veldighemmeligstring",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        secure: false,
+        maxAge: 1000 * 60 * 60
+    }
+}));
+
+
+app.post("/api/login", express.json(), (req, res) => {
     const {brukernavn, passord} = req.body
-    db.prepare("INSERT INTO Person (brukernavn, passord) VALUES(?,?)").run(brukernavn, passord);
+    const person = db
+        .prepare("SELECT brukernavn FROM Person WHERE brukernavn = ? AND passord = ?")
+        .get(brukernavn, passord);
+
+    if (!person) {
+        return res.status(401).json({ error: "Feil brukernavn eller passord"})
+    }
+
+    req.session.bruker = {brukernavn: person.brukernavn}
+    res.json({ message: "innlogget"})
 })
+
+//Registrere ny bruker
+app.post('/api/registrer_bruker', express.json(), (req, res) => {
+    // Henter ut data fra request body (det som klienten har sendt inn)
+    const { brukernavn, passord} = req.body;
+
+    // Sjekk om personen eksisterer
+  const person = db.prepare('SELECT * FROM Person WHERE brukernavn = ?').get(brukernavn);
+    if (person) {
+        return res.status(409).json({ error: 'Brukernavn finnes allerede' });
+    }
+
+    db.prepare('INSERT INTO Person (brukernavn, passord) VALUES (?, ?)').run(brukernavn, passord);
+    res.status(201).json({ message: 'Bruker registrert!' });
+})
+
+app.get("/api/session", (req, res) => {
+    if (!req.session.bruker) {
+        return res.status(401).json({ error: "ikkje innlogga"})
+    }
+
+    res.json(req.session.bruker);
+})
+
+app.post("/api/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.clearCookie("connect.sid");
+    res.json({ message: "Logget ut" });
+  });
+});
+
 
 app.get('/api/ovelser', (req, res) => {
     const rows = db.prepare('SELECT navn, muskel FROM Ovelse').all();
     res.json(rows);
 });
-
-app.get('/api/bruker', (req, res) => {
-    console.log("Forsøker å hente info om brukar.");
-    const rows = db.prepare("SELECT brukernavn, passord FROM Person").all();
-    res.json(rows);
-})
 
 app.get('api/oekt/:brukernavn', (req, res) => {
     const brukernavn = req.params.brukernavn;
@@ -52,20 +103,7 @@ app.post('/api/registrer_ovelse', express.json(), (req, res) => {
     res.status(201).json({ message: 'Fjellturen er registrert!' });
 });
 
-//Registrere ny bruker
-app.post('/api/signup', express.json(), (req, res) => {
-    // Henter ut data fra request body (det som klienten har sendt inn)
-    const { brukernavn, passord} = req.body;
 
-    // Sjekk om personen eksisterer
-    const person = db.prepare('SELECT * FROM Person WHERE brukernavn = ?').get(brukernavn);
-    if (!person) return res.status(404).json({ error: 'Person ikke funnet' });
-
-    // Registrerer ny bruker
-    db.prepare('INSERT INTO Person (brukernavn, passord) VALUES (?, ?)').run(brukernavn, passord);
-
-    res.status(201).json({ message: 'Bruker registrert er registrert!' });
-});
 
 // Åpner en viss port på serveren, og starter serveren
 app.listen(PORT, () => {
