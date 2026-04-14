@@ -35,21 +35,54 @@
     </table>
 
     <div id = "pågåendeØkt">
+        <Header id = "øktHeader">
+            <h3>Pågående treningsøkt</h3>
+            <p id = "type"></p>
+            <button id = "fullfør_økt" class="hidden">Fullfør Økt</button>
+        </Header>
+    </div>
 
+    <div id = "forms">
+        <form id = "ovelseForm" class = "hidden">
+            <label for="name">Navnet til øvelsen:</label>
+            <input type="text" for="name" id="name" required>
+            <label for="muskel">Navnet til muskelen:</label>
+            <input type="text" for="muskel" id="muskel" required>
+            <button type="submit">Legg til</button>
+        </form>
+
+        <form id ="oektForm" class ="hidden">
+            <label for="date">Dato: </label>
+            <input type ="date" for="date" id ="date" required>
+            <label for="oektType">Hvilken økt skal du ha?: </label>
+            <input type="text" for="oektType" id="oektType" required>
+            <button type = "submit">Legg til</button>
+        </form>
+
+        <form id="setForm" class ="hidden">
+            <label for="øvelseSet">Øvelse: </label>
+            <select for="øvelseSet" id = "øvelseSet" required></select>
+
+            <label for="set-nr">Set-nr: </label>
+            <input type="set-nr" id = "set-nr">
+
+            <label for="vekt">Vekt: </label>
+            <input type="text" for="vekt" id="vekt">
+
+            <label for="reps">Reps: </label>
+            <input type="number" for="reps" id="reps">
+
+            <label for="rir">Rir: </label>
+            <input type="number" for="rir" id="rir">
+
+            <button type = "submit">Legg til</button>
+        </form>
     </div>
 
     <div id = "knapper">
         <button id = "oektKnapp">Legg til økt</button>
         <button id = "ovelseKnapp">Legg til øvelse</button>
     </div>
-
-    <form id = "ovelse" class = "hidden">
-        <label for="name">Navnet til øvelsen:</label>
-        <input type="text" for="name" id="name" required>
-        <label for="name">Navnet til muskelen:</label>
-        <input type="text" for="name" id="muskel" required>
-        <button type="submit">Legg til</button>
-    </form>
     
 </body>
 </html>

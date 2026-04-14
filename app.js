@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const { randomUUID } = require("crypto");
 
 const PORT = 3000;
 
@@ -74,11 +75,11 @@ app.post("/api/logout", (req, res) => {
 
 
 app.get('/api/ovelser', (req, res) => {
-    const rows = db.prepare('SELECT navn, muskel FROM Ovelse').all();
+    const rows = db.prepare('SELECT ovelse_navn, muskel FROM ovelse').all();
     res.json(rows);
 });
 
-app.get('/api/oekt', (req, res) => {
+app.get('/api/oekt/', (req, res) => {
     if (!req.session.bruker) {
         return res.status(401).json({ error: 'Ikkje innlogga' });
     }
@@ -86,40 +87,115 @@ app.get('/api/oekt', (req, res) => {
     const brukernavn = req.session.bruker.brukernavn;
 
     const rows = db.prepare(`
-        SELECT oekt_id
-        FROM Oekt
-        WHERE brukernavn = ?
+        SELECT 
+            oekt.oekt_id,
+            oekt.oekt_type,
+            oekt.dato,
+            oekt.paagaaende
+        FROM oekt
+        WHERE oekt.brukernavn = ?
     `).all(brukernavn);
     res.json(rows);
 });
 
-app.post("/api/ny_oekt", (req, res) => {
-    const {dato, oekt_type, brukernavn} = req.body;
+app.get("/api/oekt/:oekt_id", (req, res) => {
+    if (!req.session.bruker) {
+    return res.status(401).json({ error: 'Ikkje innlogga' });
+    }
 
-        db.prepare('INSERT INTO Oekt (dato, oekt_type, brukernavn) VALUES (?,?, ?)').run(dato, oekt_type, brukernavn);
+    const brukernavn = req.session.bruker.brukernavn;
+    const oekt_id = req.params.oekt_id;
+
+    const rows = db.prepare(`
+        SELECT 
+            oekt.oekt_id,
+            oekt.oekt_type,
+            oekt.dato,
+            sett_log.set_nr,
+            sett_log.vekt,
+            sett_log.reps,
+            sett_log.ovelse_navn,
+            sett_log.rir
+        FROM oekt
+        LEFT JOIN sett_log
+            on oekt.oekt_id = sett_log.oekt_id
+            WHERE oekt.brukernavn = ?
+            AND oekt.oekt_id = ?
+        `).all(brukernavn, oekt_id)
+       
+    res.json(rows)
+})
+
+app.post('/api/registrer_ovelse', express.json(), (req, res) => {
+    const {ovelse_navn, muskel} = req.body;
+
+    db.prepare('INSERT INTO ovelse (ovelse_navn, muskel) VALUES (?, ?)').run(ovelse_navn, muskel);
+
+    res.status(201).json({
+        message: 'Ovelse registrert!',
+        ovelse: {ovelse_navn, muskel }
+    });
+});
+
+
+app.post("/api/ny_oekt", (req, res) => {
+    if (!req.session.bruker) {
+    return res.status(401).json({ error: "Ikkje innlogga" });}
+
+    const { dato, oekt_type } = req.body;
+    const brukernavn = req.session.bruker.brukernavn;
+    let paagaaende = "ja";
+
+    const result = db.prepare("INSERT INTO oekt (dato, oekt_type, brukernavn, paagaaende) VALUES (?, ?, ?, ?)")
+    .run(dato, oekt_type, brukernavn, paagaaende);
+
+    res.status(201).json({
+        message: "Økt oppretta",
+        oekt_id: result.lastInsertRowid
+    });
 
 })
 
-// Rute som lar oss registrere en ny fjelltur for en person
-app.post('/api/registrer_ovelse', express.json(), (req, res) => {
-    // Henter ut data fra request body (det som klienten har sendt inn)
-    const {navn, muskel} = req.body;
-    // Registrer den nye fjellturen
-    db.prepare('INSERT INTO Ovelse (navn, muskel) VALUES (?, ?)').run(navn, muskel);
+app.post("/api/sett_log", (req, res) => {
+    const { set_nr, vekt, reps, ovelse_navn, oekt_id, rir } = req.body;
+    if (!req.session.bruker) {
+        return res.status(401).json({ error: "Ikkje innlogga" });
+    }
 
-    res.status(201).json({ message: 'Fjellturen er registrert!' });
-});
+    db.prepare(`
+        INSERT INTO sett_log (set_nr, vekt, reps, ovelse_navn, oekt_id, rir) VALUES (?, ?, ?, ?, ?, ?)`)
+        .run(set_nr, vekt, reps, ovelse_navn, oekt_id, rir,);
+    
+    
+    res.status(201).json({ message: "Sett lagra" });
+
+})
+
+app.post("/api/avslutt_oekt", (req, res) => {
+    const {oekt_id} = req.body;
+
+    if (!req.session.bruker) {
+        return res.status(401).json({ error: "Ikkje innlogga" });
+    }
+
+    if (!oekt_id) {
+        return res.status(400).json({ error: "Mangler oekt_id" });
+    }
+
+    const result = db.prepare(`
+        UPDATE oekt
+        SET paagaaende = ?
+        WHERE oekt_id = ?
+    `).run("nei", oekt_id);
+
+    
+    res.json({ message: "Økt avslutta", endra: result.changes });
+})
 
 
-
-// Åpner en viss port på serveren, og starter serveren
 app.listen(PORT, () => {
     console.log(`Server kjører på http://localhost:${PORT}`);
 });
-
-
-//express - session, for å kunne fikse innloggingsystemet
-
 
 
 
