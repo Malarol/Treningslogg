@@ -15,7 +15,7 @@ authenticate();
 async function eksisterer_økt() {
     oekt_id = await finn_oekt_id();
 
-    if (oekt_id ==! null) {
+    if (oekt_id !== null) {
         let response = await fetch("/api/oekt/" + oekt_id)
         let data =  await response.json()
 
@@ -51,7 +51,12 @@ async function eksisterer_økt() {
             rir_i_økt.innerText = "Rir: " + rir
             set_info.appendChild(rir_i_økt)
 
-            oekt_vindu.appendChild(set_info)
+            setUtskrift.appendChild(set_info)
+
+            fullfør_knapp.classList.remove("hidden")
+            fullfør_knapp.classList.add("visible")
+
+
         }
     }
 }
@@ -156,6 +161,8 @@ async function finn_oekt_id() {
     }
 }
 
+const setUtskrift = document.getElementById("setUtskrift")
+
 let oekt_vindu = document.getElementById("pågåendeØkt")
 
 setForm.addEventListener("submit", async function(event){
@@ -201,7 +208,7 @@ setForm.addEventListener("submit", async function(event){
     rir_i_økt.innerText = "Rir: " + rir
     set_info.appendChild(rir_i_økt)
 
-    oekt_vindu.appendChild(set_info)
+    setUtskrift.appendChild(set_info)
 
 })
 
@@ -221,14 +228,16 @@ fullfør_knapp.addEventListener("click", async function() {
     console.error("Klarte ikkje å registrere økten")
     return }
 
-    oekt_vindu.innerHTML = ""
-    oekt_vindu.innerText = "Ingen pågåande øktar. Opptrett ein ny med knappen på botnen av sida"
+    setUtskrift.innerHTML = ""
 
     setForm.classList.remove("visible")
     setForm.classList.add("hidden")
 
     oektForm.classList.remove("visible")
     oektForm.classList.add("hidden")
+
+    fullfør_knapp.classList.remove("visible")
+    fullfør_knapp.classList.add("hidden")
   
 })
 
