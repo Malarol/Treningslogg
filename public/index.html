@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="index.js" defer></script>
     <link rel="stylesheet" href="index.css">
-    <title>Index</title>
+    <title>Treningslogg</title>
 </head>
 <body>
 <!-- Husk å bruk semantiske tagger -->
@@ -15,7 +15,7 @@
 
     <nav>
         <p id = "Navn"><!-- Fylt ut av JS --></p> 
-        <a href="login.html">Logg ut</a>
+        <button id="logout">Log ut</button>
     </nav>
 
     <table id = "tidlegare_okter">
@@ -39,6 +39,9 @@
             <h3>Pågående treningsøkt</h3>
             <button id = "fullfør_økt" class="hidden">Fullfør Økt</button>
         </Header>
+        <div id = "setUtskrift">
+<!-- fylles ut av js -->
+        </div>
     </div>
 
     <div id = "forms">
@@ -82,6 +85,13 @@
         <button id = "oektKnapp">Legg til økt</button>
         <button id = "ovelseKnapp">Legg til øvelse</button>
     </div>
+
+    <footer>
+        <h3>Personvernerklæring</h3>
+        <p>Denne appen registrerer brukernavn, passord, øvelsane du har lagd og øktene du har registrert</p>
+        <p>Appen bruker disse dataene slik at du kan loggføre dine treningar og ha ein systematisert oversikt over treningane dine</p>
+        <p>Appen sletter ikkje dataene dine</p>
+    </footer>
     
 </body>
 </html>

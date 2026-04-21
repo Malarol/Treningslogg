@@ -6,7 +6,8 @@ body {
         "N N N N N N N N N N"
         "T T . P P P P P P P"
         ". F F F F F F F F ."
-        ". . K K K K K K . .";
+        ". . K K K K K K . ."
+        "FO FO FO FO FO FO FO FO FO FO";
     column-gap: 1rem;
     row-gap: 2rem;
     margin: 0;
@@ -25,33 +26,26 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: 2px solid #e2e8f0;;
-    border-bottom: 2px solid #e2e8f0;;
-    padding: 1rem 1rem;
+    border-top: 2px solid #e2e8f0;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 1rem;
 }
 
 #tidlegare_okter {
     grid-area: T;
-    align-self: start;
+    width: 100%;
     background-color: #f1f5f9;
     border: 2px solid #e2e8f0;
     border-radius: 10px;
     overflow: hidden;
-    width: 100%;
-}
-
-th, td {
-    border-bottom: 2px solid #e2e8f0;;
-    padding: 0.5rem 0.5rem;
-    text-align: left;
 }
 
 #pågåendeØkt {
-    background-color:#f1f5f9;
     grid-area: P;
     display: flex;
     flex-direction: column;
-    border: 2px solid #e2e8f0;;
+    background-color: #f1f5f9;
+    border: 2px solid #e2e8f0;
     border-radius: 10px;
     overflow: hidden;
     padding: 0.75rem 1rem;
@@ -59,11 +53,11 @@ th, td {
 }
 
 #øktHeader {
-    color: #0369a1;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid #e2e8f0;;
+    color: #0369a1;
+    border-bottom: 2px solid #e2e8f0;
 }
 
 #forms {
@@ -73,8 +67,8 @@ th, td {
     align-items: center;
     flex-wrap: wrap;
     gap: 0.5rem;
-    border-top: 2px solid #e2e8f0;;
-    border-bottom: 2px solid #e2e8f0;;
+    border-top: 2px solid #e2e8f0;
+    border-bottom: 2px solid #e2e8f0;
     padding: 0.75rem 1rem;
 }
 
@@ -83,6 +77,37 @@ th, td {
     display: flex;
     justify-content: space-around;
     gap: 2rem;
+}
+
+footer {
+    grid-area: FO;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding-top: 1rem;
+    border-top: 2px solid #e2e8f0;
+}
+
+footer h3 {
+    margin: 0.25rem;
+}
+
+footer p {
+    margin: 0.25rem;
+}
+
+th {
+    border-bottom: 2px solid #e2e8f0;
+    padding: 0.5rem;
+    text-align: left;
+}
+
+td {
+    border-bottom: 2px solid #e2e8f0;
+    padding: 0.5rem;
+    text-align: left;
 }
 
 .hidden {
@@ -94,22 +119,18 @@ th, td {
 }
 
 .set {
-    display: flex;
-    justify-content: space-around;
-    grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 1rem;
-    border-bottom: 2px solid #e2e8f0;;
+    border-bottom: 2px solid #e2e8f0;
     padding: 0.75rem 0;
 }
 
-.set div {
+.set p {
     text-align: center;
 }
 
 #fullfør_økt {
-    grid-column: 4 / -1;
     justify-self: end;
 }
 
@@ -142,23 +163,29 @@ a {
             "T"
             "P"
             "F"
-            "K";
+            "K"
+            "FO";
     }
 
-    #pågåendeØkt,
+    #pågåendeØkt {
+        min-height: auto;
+    }
+
+    #forms {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #knapper {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
     .set {
         grid-template-columns: 1fr;
     }
 
-    #pågåendeØkt::before,
-    #fullfør_økt,
-    .set {
-        grid-column: 1;
-    }
-
-    #forms,
-    #knapper {
-        flex-direction: column;
-        align-items: flex-start;
+    #fullfør_økt {
+        justify-self: start;
     }
 }

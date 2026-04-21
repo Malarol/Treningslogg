@@ -1,0 +1,18 @@
+body {
+    min-height: 100vh;
+    margin: 0;
+    font-size: 16;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#authenticate {
+    display: flex;
+    width: min(90%, 35rem);
+    background-color: #f1f5f9;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;     
+    height: 100vh;           
+}
