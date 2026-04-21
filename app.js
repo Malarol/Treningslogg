@@ -1,3 +1,4 @@
+//--------Setup--------
 const express = require("express");
 const app = express();
 
@@ -11,13 +12,16 @@ const cors = require('cors');
 app.use(cors());
 app.use(express.static('public'));
 
-const bcrypt = require('bcryptjs');
+//Bcrypt for å kryptere passord
+const bcrypt = require('bcryptjs') 
 
-const session = require('express-session');
+//Session: Middleware for å lagre brukerdata i nettleseren(cookies)
+const session = require('express-session')
 app.use(express.json());
 
+//Session setup
 app.use(session({
-    secret: "veldighemmeligstringslikatingenandrekangjøreskadeellerfåtilgangtildatabasenmin",
+    secret: "veldighemmeligstringslikatingenandrekangjøreskadeellerfåtilgangtildatabasenminellerskadedeifinebrukaranemine23498234092384",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -27,11 +31,14 @@ app.use(session({
     }
 }));
 
+//--------Setup--------
 
-app.post("/api/login", express.json(), (req, res) => {
+//--------API-endepunkt--------
+
+app.post("/api/login", (req, res) => {
     const { brukernavn, passord } = req.body;
 
-    const person = db
+    const person = db //Henter brukernavn og passord der brukernavn = det klienten sendte fra body
         .prepare("SELECT brukernavn, passord FROM Person WHERE brukernavn = ?")
         .get(brukernavn);
 
@@ -39,41 +46,42 @@ app.post("/api/login", express.json(), (req, res) => {
         return res.status(401).json({ error: "Feil brukernavn eller passord" });
     }
 
-    const stemmerPassord = bcrypt.compareSync(passord, person.passord);
+    const stemmerPassord = bcrypt.compareSync(passord, person.passord); //Sammenligner passord fra body og kryptert passord i databasen
 
     if (!stemmerPassord) {
         return res.status(401).json({ error: "Feil brukernavn eller passord" });
     }
 
-    req.session.bruker = { brukernavn: person.brukernavn };
+    req.session.bruker = { brukernavn: person.brukernavn }; //Registrerer ein session til brukeren
     res.json({ message: "innlogget" });
 });
 
 //Registrere ny bruker
-app.post('/api/registrer_bruker', express.json(), (req, res) => {
-    const { brukernavn, passord } = req.body;
+app.post('/api/registrer_bruker', (req, res) => {
+    const { brukernavn, passord} = req.body;
 
     // Sjekk om personen eksisterer
-    const person = db.prepare('SELECT * FROM Person WHERE brukernavn = ?').get(brukernavn);
+  const person = db.prepare('SELECT * FROM Person WHERE brukernavn = ?').get(brukernavn);
     if (person) {
         return res.status(409).json({ error: 'Brukernavn finnes allerede' });
     }
 
-    const hashedPassord = bcrypt.hashSync(passord, 10);
+    const hashedPassord = bcrypt.hashSync(passord, 10) //Krypterer passord for sikkerhet
 
-    db.prepare('INSERT INTO Person (brukernavn, passord) VALUES (?, ?)').run(brukernavn, hashedPassord);
+    //Registrerer brukernavn og passord i databasen
+    db.prepare('INSERT INTO Person (brukernavn, passord) VALUES (?, ?)').run(brukernavn, hashedPassord); 
     res.status(201).json({ message: 'Bruker registrert!' });
-});
+})
 
-app.get("/api/session", (req, res) => {
+app.get("/api/session", (req, res) => { //Sjekker om brukeren er logga inn og returnerer brukeren
     if (!req.session.bruker) {
-        return res.status(401).json({ error: "ikkje innlogga" });
+        return res.status(401).json({ error: "ikkje innlogga"})
     }
 
     res.json(req.session.bruker);
-});
+})
 
-app.post("/api/logout", (req, res) => {
+app.post("/api/logout", (req, res) => { //Fjerner session til brukeren, altså cookien som er lagra i nettsida
     req.session.destroy(() => {
         res.clearCookie("connect.sid");
         res.json({ message: "Logget ut" });
@@ -81,12 +89,12 @@ app.post("/api/logout", (req, res) => {
 });
 
 
-app.get('/api/ovelser', (req, res) => {
+app.get('/api/ovelser', (req, res) => { // Returnerer alle øvelsane fra databasen
     const rows = db.prepare('SELECT ovelse_navn, muskel FROM ovelse').all();
     res.json(rows);
 });
 
-app.get('/api/oekt/', (req, res) => {
+app.get('/api/oekt/', (req, res) => { //Returnerer alle øktane til ein bestemt bruker
     if (!req.session.bruker) {
         return res.status(401).json({ error: 'Ikkje innlogga' });
     }
@@ -105,13 +113,13 @@ app.get('/api/oekt/', (req, res) => {
     res.json(rows);
 });
 
-app.get("/api/oekt/:oekt_id", (req, res) => {
+app.get("/api/oekt/:oekt_id", (req, res) => { //Returnerer både sett logg og økt til ein bestemt økt id
     if (!req.session.bruker) {
-        return res.status(401).json({ error: 'Ikkje innlogga' });
+    return res.status(401).json({ error: 'Ikkje innlogga' });
     }
 
     const brukernavn = req.session.bruker.brukernavn;
-    const oekt_id = req.params.oekt_id;
+    const oekt_id = req.params.oekt_id; //Fra nettleser-stien
 
     const rows = db.prepare(`
         SELECT 
@@ -128,13 +136,13 @@ app.get("/api/oekt/:oekt_id", (req, res) => {
             on oekt.oekt_id = sett_log.oekt_id
             WHERE oekt.brukernavn = ?
             AND oekt.oekt_id = ?
-        `).all(brukernavn, oekt_id);
+        `).all(brukernavn, oekt_id)
        
-    res.json(rows);
-});
+    res.json(rows)
+})
 
-app.post('/api/registrer_ovelse', express.json(), (req, res) => {
-    const { ovelse_navn, muskel } = req.body;
+app.post('/api/registrer_ovelse', (req, res) => { //Registrer både øvelser til databasen
+    const {ovelse_navn, muskel} = req.body;
 
     db.prepare('INSERT INTO ovelse (ovelse_navn, muskel) VALUES (?, ?)').run(ovelse_navn, muskel);
 
@@ -145,14 +153,13 @@ app.post('/api/registrer_ovelse', express.json(), (req, res) => {
 });
 
 
-app.post("/api/ny_oekt", (req, res) => {
+app.post("/api/ny_oekt", (req, res) => { //Registrerer ein ny økt til databasen
     if (!req.session.bruker) {
-        return res.status(401).json({ error: "Ikkje innlogga" });
-    }
+    return res.status(401).json({ error: "Ikkje innlogga" });}
 
     const { dato, oekt_type } = req.body;
     const brukernavn = req.session.bruker.brukernavn;
-    let paagaaende = "ja";
+    let paagaaende = "ja"; // Brukes for å handtere om økten er aktiv
 
     const result = db.prepare("INSERT INTO oekt (dato, oekt_type, brukernavn, paagaaende) VALUES (?, ?, ?, ?)")
     .run(dato, oekt_type, brukernavn, paagaaende);
@@ -161,9 +168,9 @@ app.post("/api/ny_oekt", (req, res) => {
         message: "Økt oppretta",
     });
 
-});
+})
 
-app.post("/api/sett_log", (req, res) => {
+app.post("/api/sett_log", (req, res) => { //Legger sett til i økten
     const { set_nr, vekt, reps, ovelse_navn, oekt_id, rir } = req.body;
     if (!req.session.bruker) {
         return res.status(401).json({ error: "Ikkje innlogga" });
@@ -176,10 +183,10 @@ app.post("/api/sett_log", (req, res) => {
     
     res.status(201).json({ message: "Sett lagra" });
 
-});
+})
 
-app.post("/api/avslutt_oekt", (req, res) => {
-    const { oekt_id } = req.body;
+app.post("/api/avslutt_oekt", (req, res) => { //Avslutter økten, altså setter pågående til nei
+    const {oekt_id} = req.body;
 
     if (!req.session.bruker) {
         return res.status(401).json({ error: "Ikkje innlogga" });
@@ -197,9 +204,11 @@ app.post("/api/avslutt_oekt", (req, res) => {
 
     
     res.json({ message: "Økt avslutta", endra: result.changes });
-});
+})
 
+// --------API-endepunkt--------
 
+//Port
 app.listen(PORT, () => {
     console.log(`Server kjører på http://localhost:${PORT}`);
 });

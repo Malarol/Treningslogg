@@ -1,4 +1,5 @@
-async function authenticate() {
+// -------- SETUP--------
+async function authenticate() { //Sjekker om det eksisterer ein session
     const response = await fetch("api/session");
 
     if (!response.ok) {
@@ -12,7 +13,19 @@ async function authenticate() {
 
 authenticate();
 
-async function eksisterer_økt() {
+async function finn_oekt_id() { //Leter etter den pågående økta, og returnerer id'en til den økta
+    let response = await fetch("/api/oekt");
+    let data = await response.json();
+
+    for (let i = 0; i < data.length; i++) {
+        let element = data[i];
+        if (element.paagaaende === "ja") {
+            return element.oekt_id;
+        }
+    }
+}
+
+async function eksisterer_økt() { // Når nettsida blir lasta inn på nytt igjen, fyller ut den pågående økten som ikkje er avslutta
     oekt_id = await finn_oekt_id();
 
     if (oekt_id !== null) {
@@ -66,14 +79,14 @@ async function eksisterer_økt() {
 
 eksisterer_økt();
 
-async function full_ut_tidlegare_økter() {
+async function full_ut_tidlegare_økter() { //Fyller ut dato og type om 3 nylegaste øktane
     let response = await fetch("/api/oekt");
     let data = await response.json();
 
-    let antall = Math.min(data.length, 3);
+    let antall = Math.min(data.length, 3); // Finner lengden på data.length, men returnerer maks 3 
     let j = 1; // teller, for å finne id til de ulike utskriftene i html
 
-    for (let i = data.length - 1; i >= data.length - antall; i--) {
+    for (let i = data.length - 1; i >= data.length - antall; i--) {  //Reverse for løkke som finner dei 3(eller mindre) nylegaste øktene
         let element = data[i];
 
         let okt = document.getElementById("utskrift" + j);
@@ -95,7 +108,7 @@ async function full_ut_tidlegare_økter() {
 
 full_ut_tidlegare_økter();
 
-async function full_ut_øvelser() {
+async function full_ut_øvelser() { //Finner øvelser fra databasen og fyll dei ut i ein dropdown
     const øvelser = document.getElementById("øvelseSet");
     øvelser.innerHTML = "";
 
@@ -115,16 +128,20 @@ async function full_ut_øvelser() {
 
 full_ut_øvelser();
 
+// --------SETUP--------
+
+// --------HOVEDDEL (FORMS OG KNAPPER)--------
+
 let start_oekt_knapp = document.getElementById("oektKnapp");
 let oektForm = document.getElementById("oektForm");
 let setForm = document.getElementById("setForm");
 
-start_oekt_knapp.addEventListener("click", function() {
+start_oekt_knapp.addEventListener("click", function() { //Start økt knapp opner formen som trengs for å starte økten
     oektForm.classList.remove("hidden");
     oektForm.classList.add("visible");
 });
 
-oektForm.addEventListener("submit", async function(event) {
+oektForm.addEventListener("submit", async function(event) { //Informasjon om økten, altså dato og økt type
     event.preventDefault();
     let dato = document.getElementById("date").value;
     let oekt_type = document.getElementById("oektType").value;
@@ -151,21 +168,7 @@ oektForm.addEventListener("submit", async function(event) {
     }
 });
 
-async function finn_oekt_id() {
-    let response = await fetch("/api/oekt");
-    let data = await response.json();
-
-    for (let i = 0; i < data.length; i++) {
-        let element = data[i];
-        if (element.paagaaende === "ja") {
-            return element.oekt_id;
-        }
-    }
-}
-
-let oekt_vindu = document.getElementById("pågåendeØkt");
-
-setForm.addEventListener("submit", async function(event) {
+setForm.addEventListener("submit", async function(event) { //Legger til eit nytt sett i økta og fyller det ut i pågående økt vindu
     event.preventDefault();
     let ovelse_navn = document.getElementById("øvelseSet").value;
     let set_nr = document.getElementById("set-nr").value;
@@ -214,9 +217,46 @@ setForm.addEventListener("submit", async function(event) {
     setUtskrift.appendChild(set_info);
 });
 
+let vis_ovelse_form = document.getElementById("ovelseKnapp");
+const ovelseform = document.getElementById("ovelseForm");
+
+vis_ovelse_form.addEventListener("click", function() { //Synleggjer form som trengs for å legge til nye øvelser
+    ovelseform.classList.remove("hidden");
+    ovelseform.classList.add("visible");
+});
+
+ovelseform.addEventListener("submit", async function(event) {  //Legger til nye øvelser
+    event.preventDefault();
+
+    let ovelse_navn = document.getElementById("name").value;
+    let muskel = document.getElementById("muskel").value;
+
+    let response = await fetch("/api/registrer_ovelse", {
+        method: "POST",
+        headers: {"Content-Type": "application/json" },
+        body: JSON.stringify({ ovelse_navn, muskel })
+    });
+    if (!response.ok) {
+        console.error("Klarte ikkje å registrere øvelse");
+        return;
+    }
+
+    const data = await response.json();
+    console.log("Øvelse lagret:", data);
+
+    full_ut_øvelser(); //Fyller ut øvelsen i dropdown
+
+    ovelseform.classList.remove("visible");
+    ovelseform.classList.add("hidden");
+});
+
+// --------HOVEDDEL (FORMS OG KNAPPER)--------
+
+// --------AVSLUTTING--------
+
 const fullfør_knapp = document.getElementById("fullfør_økt");
 
-fullfør_knapp.addEventListener("click", async function() {
+fullfør_knapp.addEventListener("click", async function() { //Finner økt ideen til pågående økt og endrer pågående fra ja til nei
     let oekt_id = await finn_oekt_id();
 
     let response = await fetch("/api/avslutt_oekt", {
@@ -244,42 +284,9 @@ fullfør_knapp.addEventListener("click", async function() {
     fullfør_knapp.classList.add("hidden");
 });
 
-let vis_ovelse_form = document.getElementById("ovelseKnapp");
-const ovelseform = document.getElementById("ovelseForm");
-
-vis_ovelse_form.addEventListener("click", function() {
-    ovelseform.classList.remove("hidden");
-    ovelseform.classList.add("visible");
-});
-
-ovelseform.addEventListener("submit", async function(event) {
-    event.preventDefault();
-
-    let ovelse_navn = document.getElementById("name").value;
-    let muskel = document.getElementById("muskel").value;
-
-    let response = await fetch("/api/registrer_ovelse", {
-        method: "POST",
-        headers: {"Content-Type": "application/json" },
-        body: JSON.stringify({ ovelse_navn, muskel })
-    });
-    if (!response.ok) {
-        console.error("Klarte ikkje å registrere øvelse");
-        return;
-    }
-
-    const data = await response.json();
-    console.log("Øvelse lagret:", data);
-
-    full_ut_øvelser();
-
-    ovelseform.classList.remove("visible");
-    ovelseform.classList.add("hidden");
-});
-
 const logut_knapp = document.getElementById("logout");
 
-logut_knapp.addEventListener("click", async function(event) {
+logut_knapp.addEventListener("click", async function(event) { //Logger ut av nettsida, fjerner cookien
     event.preventDefault();
 
     const response = await fetch("/api/logout", {
@@ -290,3 +297,5 @@ logut_knapp.addEventListener("click", async function(event) {
         window.location.href = "login.html";
     }
 });
+
+//--------AVSLUTTING--------
