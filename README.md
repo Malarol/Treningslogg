@@ -2,6 +2,9 @@
 Lage ein app som kan lagre treningsøkter og diverse statestikk om treningsøkten.
 Bruker better-sqlite3, express, express-session, cors og bcrypt
 
+## Databasen
+<img src="datamod-trening.png"> 
+
 
 ## API endepunkter
 app.post("/api/login",):
@@ -44,11 +47,6 @@ index.html, index.css og index.js er hovudsida. Her får brukaren informasjon fr
 
 ### 17/3
 Lagt databasen
-
-Bilde: Midlertidig bilde <img src="datamod-trening.jpg"> 
-Husk rir, det er lagt til settlogg
-
-
 Lagt til testdata på øvelser til ein push økt. Lagt testdata til bruker, dette er midlertidig
 
 Også begynt på app.js, her har eg lagt ein sti til øvelser, bruker og økt til spesifikk bruker(usikker på om denne funker.)

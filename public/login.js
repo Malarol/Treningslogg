@@ -1,12 +1,10 @@
-// Authentication system
 
-//Behandler form
-const form = document.getElementById("authenticate");
+const form = document.getElementById("authenticate"); //Behandler login form
 
 form.addEventListener("submit", function(event) {
     event.preventDefault();
     
-    const authType = document.querySelector('input[name="authType"]:checked').value;
+    const authType = document.querySelector('input[name="authType"]:checked').value; //Returnerer enten login eller signup
     const brukernavn = document.getElementById("name").value;
     const passord = document.getElementById("password").value;
 
@@ -19,7 +17,7 @@ form.addEventListener("submit", function(event) {
     }
 });
 
-async function login(brukernavn, passord) {
+async function login(brukernavn, passord) { //Sammenligner bruker og passord i backend
     const response = await fetch('/api/login', {
         method: "POST",
         headers: {"Content-Type": "application/json" },
@@ -27,7 +25,7 @@ async function login(brukernavn, passord) {
     });
 
     if (response.ok) {
-        window.location.href = "index.html";
+        window.location.href = "index.html"; //Sender bruker til index
     }
     else {
         console.log("Feil brukernavn eller passord");
@@ -44,18 +42,10 @@ async function signup(brukernavn, passord) {
     });
 
     if (response.ok) {
-        window.location.href = "login.html";
+        window.location.href = "login.html"; //Brukeren kommer tilbake til login.html for å logge på med den nye brukeren
     }
     else {
         console.log("Brukeren eksisterer allerede eller teknisk feil");
     }
 };
 
-
-
-
-
-
-
-
-//session

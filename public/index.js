@@ -256,7 +256,7 @@ ovelseform.addEventListener("submit", async function(event) {  //Legger til nye 
 
 const fullfør_knapp = document.getElementById("fullfør_økt");
 
-fullfør_knapp.addEventListener("click", async function() { //Finner økt ideen til pågående økt og endrer pågående fra ja til nei
+fullfør_knapp.addEventListener("click", async function() { //Finner økt ide'en til pågående økt og endrer pågående fra ja til nei
     let oekt_id = await finn_oekt_id();
 
     let response = await fetch("/api/avslutt_oekt", {

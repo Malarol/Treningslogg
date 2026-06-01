@@ -1,33 +1,40 @@
 //--------Setup--------
-const express = require("express");
-const app = express();
 
+//-------- Importar --------
+const express = require("express");
+const cors = require("cors");
+const session = require("express-session");
+const bcrypt = require("bcryptjs");
+const Database = require("better-sqlite3");
+
+//-------- App og konstanter --------
+const app = express();
 const PORT = 3000;
 
-const Database = require('better-sqlite3');
-const db = new Database('trening-backup.db');
+//Databasen eg bruker
+const db = new Database("trening-backup.db");
 
-// CORS-middleware for å tillate forespørsler fra andre domener
-const cors = require('cors');
-app.use(cors());
-app.use(express.static('public'));
+// --------Middleware --------
 
-//Bcrypt for å kryptere passord
-const bcrypt = require('bcryptjs') 
-
-//Session: Middleware for å lagre brukerdata i nettleseren(cookies)
-const session = require('express-session')
+// Tillat JSON i request body
 app.use(express.json());
 
-//Session setup
+// Tillater kommunikasjon mellom frontend og backend
+app.use(cors());
+
+// Mappa backend kommuniserer med
+app.use(express.static("public"));
+
+// Session innstillinger
 app.use(session({
+    //Nøkkel til cookien, slik at den ikkje kan manipulerast av klient
     secret: "veldighemmeligstringslikatingenandrekangjøreskadeellerfåtilgangtildatabasenminellerskadedeifinebrukaranemine23498234092384",
-    resave: false,
-    saveUninitialized: false,
+    resave: false, //Session blir ikkje lagra på nytt dersom ingenting endrer seg
+    saveUninitialized: false, //Ein tom session blir ikkje lagra
     cookie: {
-        httpOnly: true,
-        secure: false,
-        maxAge: 1000 * 60 * 60
+        httpOnly: true, //cookien kan ikkje lesast av js i nettleseren
+        secure: false, //cookien kan sendast over HTTP og HTTPS
+        maxAge: 1000 * 60 * 60 //Lengde på session, altså 1 time
     }
 }));
 
